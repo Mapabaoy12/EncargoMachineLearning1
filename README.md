@@ -5,8 +5,8 @@ un algoritmo de inteligencia musical, por lo tanto hace entrega del dataset carg
 para determinar los factores de éxito de la industria.
 
 ## 2. Objetivos del proyecto
-#**Objetivo General:** Desarrollar un modelo predictivo que clasifique la popularidad de las canciones según distintas variables.
-#**Objetivos especificos:**  
+# **Objetivo General:** Desarrollar un modelo predictivo que clasifique la popularidad de las canciones según distintas variables.
+# **Objetivos especificos:**  
   Identificar variables con alta correlacion con la variable objetivo "popularity"
   Identificar sesgos dentro del dataset
   Limpiar y transformar los datos musicales resolviendo problemas de alta cardinalidad
