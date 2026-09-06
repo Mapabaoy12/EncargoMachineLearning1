@@ -5,12 +5,13 @@ un algoritmo de inteligencia musical, por lo tanto hace entrega del dataset carg
 para determinar los factores de éxito de la industria.
 
 ## 2. Objetivos del proyecto
-# **Objetivo General:** Desarrollar un modelo predictivo que clasifique la popularidad de las canciones según distintas variables.
-# **Objetivos especificos:**  
-  Identificar variables con alta correlacion con la variable objetivo "popularity"
-  Identificar sesgos dentro del dataset
-  Limpiar y transformar los datos musicales resolviendo problemas de alta cardinalidad
-  Garantizar la integridad de los datos mediante validaciones de seguridad
+#**Objetivo General:** Desarrollar un modelo de aprendizaje que permita predecir, con una buena precisión, la popularidad de una canción. Además, se pretende encontrar patrones que permitan entender mejor las preferencias generales del público.
+#**Objetivos específicos:**  
+-   Identificar variables con alta correlación con la variable objetivo "popularity".
+-   Identificar sesgos dentro del dataset.
+-   Limpiar y transformar los datos musicales resolviendo problemas de alta cardinalidad.
+-   Garantizar la integridad de los datos mediante validaciones de seguridad.
+-   Generar pipeline de preprocesamiento robusto y reproducible para futuros modelos de aprendizaje.
 
 ## 3. Definiciones de KPIs
 Para medir el exito del proyecto se definen los siguientes KPIs
@@ -18,15 +19,20 @@ Para medir el exito del proyecto se definen los siguientes KPIs
 *  **Reudccion de dimensionalidad:** Disminuir las variables de alta cardinalidad
 
 ## 4. Fuente de datos
-Se utiliza la fuente de datos proveniente de la empresa **Spotify Tracks Dataset**
-en formato .csv, se promueve su uso medienta la conexion con el repositorio en github mediante el url y la carga de datos con pandas
+Se utiliza como fuente de datos un dataset guardado en un archivo .csv, que cuenta con información proveniente de la empresa **Spotify**. Se hace uso de este a través de una conexión con github mediante el url del repositorio, y se carga dentro del notebook utilizando la librería Pandas de Python.
 
-
-## 5. Metodologia CRISP-DM
+## 5. Metodología CRISP-DM
 La metodologia cuenta con seis fases principales que nos permitieron desarrollar el proyecto:
-* **Comprension del negocio**
-* **Comprension de los datos**
-* **Preparacion de los datos**
+* **Comprensión del negocio**
+  En la industria musical digital se vuelve necesario comprender los factores que impulsan el éxito comercial y la recepción de la audiencia, no sólo para los artistas, sino también para las propias plataformas. Es por lo anterior que se define como objetivo el desarrollo de un modelo analítico y predictivo que sea capaz de procesar la información referente a las canciones de Spotify para estimar su grado de éxito comercial, definiendo un flujo de trabajo que se centre en la estructura que facilite la reproducibilidad del entorno.
+  
+* **Comprensión de los datos**
+  Todo el análisis es basado en el dataset presente en este repositorio de nombre 'Spotify_Tracks_Dataset.csv', el cuál contiene un volumen inicial de 114.000 registros, cada uno correspondiente a pistas musicales presentes en la plataforma. Cada registro cuenta con variables cuantitativas de audio así como datos descriptivos(artistas, álbumes, géneros).
+
+  Durante la fase de exploración se identificaron dos dilemas significativos que requirieron análisis más detallado:
+  - *Duplicidad por género:* Cuando una canción está asociada a más de un género, existían múltiples filas para esa canción en particular, lo que inflaba la cantidad de filas totales de 89740 canciones únicas a 114.000 filas de registros.
+  - *Comportamiento de la variable objetivo:* Se observó que la variable objetivo para este proyecto('popularity') cuenta con una alta concentración en torno al valor 0, equivalente a aproximadamente un 14% de los registros.
+* **Preparación de los datos**
 * **Modelado**
 * **Evaluacion**
 * **Despliegue**
