@@ -38,27 +38,19 @@ Para evaluar el desempeño integral y la viabilidad del proyecto, se definen ind
 ### 3.1. KPIs de Negocio
 Miden el impacto directo de la solución sobre la experiencia del usuario y la gestión del catálogo de Spotify:
 
-1. **Tasa de Detección Temprana de Éxitos Independientes (*Breakout Discovery Rate*):**
+**Tasa de Detección Temprana de Éxitos Independientes (*Breakout Discovery Rate*):**
    * **Definición:** Porcentaje de canciones producidas por artistas emergentes o de sellos independientes (con catálogos históricos reducidos) con alto potencial de éxito que el sistema identifica con precisión.
    * **Meta Cuantificable:** Lograr que el modelo identifique correctamente al menos el **70% de las canciones independientes con potencial de éxito** (definidas con un umbral de popularidad $\ge 60$ puntos), facilitando su inclusión temprana en playlists destacadas y optimizando la labor de búsqueda de nuevos talentos (*scouting* artístico).
-
-2. **Reducción de la Tasa de Abandono Temprano (*Skip Rate*):**
-   * **Definición:** Porcentaje de canciones recomendadas o añadidas por el sistema que los oyentes descartan o saltan durante los primeros 30 segundos de reproducción.
-   * **Meta Cuantificable:** Reducir en un **5% la tasa de salto** en listas de descubrimiento asistidas por el algoritmo, garantizando una selección musical con mayor afinidad y retención de usuarios.
 
 ---
 
 ### 3.2. KPIs Técnicos de Machine Learning
 Evalúan la calidad estadística de las predicciones y la equidad del pipeline analítico:
 
-1. **Error Absoluto Medio (*Mean Absolute Error* - MAE):**
+**Error Absoluto Medio (*Mean Absolute Error* - MAE):**
    * **Definición:** Métrica continua que cuantifica el promedio de las diferencias absolutas entre el puntaje de popularidad real de la canción y el estimado por el modelo.
    * **Meta Cuantificable:** Obtener un **$\text{MAE} < 5$ puntos de popularidad** (en la escala nativa de 0 a 100) evaluado sobre el conjunto de prueba desacoplado (*test set*), asegurando un margen de error estrecho y confiable para la toma de decisiones.
 
-2. **Tasa de Impacto Dispar (*Disparate Impact Ratio* - DIR / Regla del 80%):**
-   * **Definición:** Métrica de justicia algorítmica (*fairness*) que evalúa la relación entre la tasa de predicción favorable otorgada a géneros minoritarios/independientes frente a la tasa de géneros comerciales dominantes:
-     $$\text{DIR} = \frac{P(\hat{Y} = 1 \mid \text{Género Minoritario})}{P(\hat{Y} = 1 \mid \text{Género Dominante})}$$
-   * **Meta Cuantificable:** Mantener un **$\text{DIR} \ge 0.80$**, garantizando el cumplimiento del umbral regulatorio contra la discriminación automatizada y evitando que el algoritmo margine sistemáticamente la música de nicho en favor de los estilos masivos.
 
 ---
 
