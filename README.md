@@ -17,7 +17,8 @@ para determinar los factores de éxito de la industria.
 ## 3. Definiciones de KPIs
 Para medir el exito del proyecto se definen los siguientes KPIs
 *  **que metrica priorizamos chiques
-*  **Reudccion de dimensionalidad:** Disminuir las variables de alta cardinalidad
+*  **Reduccion de dimensionalidad:** Disminuir las variables de alta cardinalidad
+  
 
 ## 4. Fuente de datos
 Se utiliza como fuente de datos un dataset guardado en un archivo .csv, que cuenta con información proveniente de la empresa **Spotify**. Se hace uso de este a través de una conexión con github mediante el url del repositorio, y se carga dentro del notebook utilizando la librería Pandas de Python.
@@ -34,19 +35,22 @@ La metodologia cuenta con seis fases principales que nos permitieron desarrollar
   - *Duplicidad por género:* Cuando una canción está asociada a más de un género, existían múltiples filas para esa canción en particular, lo que inflaba la cantidad de filas totales de 89740 canciones únicas a 114.000 filas de registros.
   - *Comportamiento de la variable objetivo:* Se observó que la variable objetivo para este proyecto('popularity') cuenta con una alta concentración en torno al valor 0, equivalente a aproximadamente un 14% de los registros.
 * **Preparación de los datos**
+  Limpieza de nulos, eliminación de duplicados, Feature Engineering 
 * **Modelado**
+*   Aun por hacer
 * **Evaluacion**
+*   Aun por hacer
 * **Despliegue**
+*   Aun por hacer
 
 ## 6. Analisis exploratorio
-(aqui copie y pegue lo que puse en el notebook)
-Para proteger la privacidad de los datos se ocupa la funcion SHA-256 para encriptarlos y mantenerlos anonimos,
-esto ayuda a mantener la integridad de los datos de llegada para verificar que no esten corrompidos,
-asegurando el cumplimiento da ley de proteccion de datos 21.719.\
-El dataset presenta cierta de cantidad de datos con poca relevancia estadistica o duplicados, 
-como se comprueba al buscar filas que tengan la columna "track_id" y "track_genre" con los mismos datos, se opta eliminarlos para mitigar sesgo innecesario, no obstante,
-se mantienen filas que tienen los mismos datos a excepcion del genero, debido a la importancia del ultimo en un modelo que busca predecir la popularidad,
-a consciencia del sesgo que llegara a producir dentro del algoritmo(ya que no hemos encontrado forma optima de tratarlo gemini activate).\
+Para proteger la privacidad de los datos se ocupa la función SHA-256 para encriptarlos y mantenerlos anónimos,
+esto ayuda a mantener la integridad de los datos de llegada para verificar que no estén corrompidos,
+asegurando el cumplimiento da ley de protección de datos 21.719.\
+El dataset presenta cierta de cantidad de datos con poca relevancia estadística o duplicados, 
+cómo se comprueba al buscar filas que tengan la columna "track_id" y "track_genre" con los mismos datos, se opta eliminarlos para mitigar sesgo innecesario, no obstante,
+se mantienen filas que tienen los mismos datos a excepción del género, debido a la importancia del último en un modelo que busca predecir la popularidad,
+a consciencia del sesgo que llegara a producir dentro del algoritmo.\
 Se opta de la eliminacion de variables como 'track_id', 'track_name', 'album_name', 'energy' y 'Unnamed: 0', por la alta correlacion con la variable objetivo, 
 ya que si fuera entrenado con esto se produciria sobreajuste(era ese verda, si, a ya).\
 La variable 'artist' se busca mantener a pesar de su alta correlacion con el objetivo debido a la importancia del artista al momento de predecir popularidad,
