@@ -54,16 +54,6 @@ Evalúan la calidad estadística de las predicciones y la equidad del pipeline a
 
 ---
 
-### 3.3. Matriz de Alineación Estratégica
-
-| Objetivo Estratégico | KPI de Negocio Asociado | Métrica Técnica / ML | Meta Cuantificable |
-| :--- | :--- | :--- | :--- |
-| **Detección de Talento** | Identificación de éxitos emergentes | Sensibilidad (*Recall*) en temas $\ge 60$ pts | $\ge 70\%$ de acierto |
-| **Precisión de Catálogo** | Estimación fiable del puntaje musical | Error Absoluto Medio (MAE) | $< 5$ puntos de error |
-| **Retención del Usuario** | Reducción de saltos (*Skip Rate*) | Precisión (*Precision*) en alta popularidad | Disminución del 5% en saltos |
-| **Equidad Algorítmica** | Representatividad de música diversa | Tasa de Impacto Dispar (DIR) | $\ge 0.80$ (Regla del 80%) |
-
----
 
 # 4. Descripción de las Fuentes de Datos y Entorno Tecnológico
 
