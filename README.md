@@ -29,15 +29,91 @@ Desarrollar un pipeline integral de preparación de datos y una solución analí
 * **Diseñar e implementar ingeniería de características vectorizada:** Generar nuevos predictores basados en interacciones acústicas (p. ej., combinación aditiva de valencia e instrumentalidad, segregación de artista principal y detección binaria de colaboraciones), mitigando el impacto de la alta cardinalidad mediante técnicas avanzadas de transformación y codificación (*Target Encoding* y *One-Hot Encoding*).
 * **Construir un pipeline de preprocesamiento desacoplado y reproducible:** Estructurar un flujo modular mediante `ColumnTransformer` y separación estricta de particiones de entrenamiento y prueba (*Train/Test split*), garantizando la reproducibilidad metodológica y la preparación de los datos para la futura fase de modelamiento predictivo (regresión o clasificación).
 
-## 3. Definiciones de KPIs
-Para medir el exito del proyecto se definen los siguientes KPIs
-*  Obtener un MAE < 5 puntos de popularidad (escala 0 a 100) en el conjunto de datos de prueba.
-*  
-*  Lograr que el modelo identifique correctamente al menos el 70% de las canciones con potencial de éxito (popularidad > 60) producidas por artistas emergentes o independientes.
-  
+# 3. Definición de KPIs del Proyecto
 
-## 4. Fuente de datos
-Se utiliza como fuente de datos un dataset guardado en un archivo .csv, que cuenta con información proveniente de la empresa **Spotify**. Se hace uso de este a través de una conexión con github mediante el url del repositorio, y se carga dentro del notebook utilizando la librería Pandas de Python.
+Para evaluar el desempeño integral y la viabilidad del proyecto, se definen indicadores clave de rendimiento (KPIs) divididos en dos niveles complementarios: **KPIs de Negocio** (impacto operacional y valor estratégico en la plataforma) y **KPIs Técnicos de Machine Learning** (precisión matemática, capacidad predictiva y justicia algorítmica).
+
+---
+
+### 3.1. KPIs de Negocio
+Miden el impacto directo de la solución sobre la experiencia del usuario y la gestión del catálogo de Spotify:
+
+1. **Tasa de Detección Temprana de Éxitos Independientes (*Breakout Discovery Rate*):**
+   * **Definición:** Porcentaje de canciones producidas por artistas emergentes o de sellos independientes (con catálogos históricos reducidos) con alto potencial de éxito que el sistema identifica con precisión.
+   * **Meta Cuantificable:** Lograr que el modelo identifique correctamente al menos el **70% de las canciones independientes con potencial de éxito** (definidas con un umbral de popularidad $\ge 60$ puntos), facilitando su inclusión temprana en playlists destacadas y optimizando la labor de búsqueda de nuevos talentos (*scouting* artístico).
+
+2. **Reducción de la Tasa de Abandono Temprano (*Skip Rate*):**
+   * **Definición:** Porcentaje de canciones recomendadas o añadidas por el sistema que los oyentes descartan o saltan durante los primeros 30 segundos de reproducción.
+   * **Meta Cuantificable:** Reducir en un **5% la tasa de salto** en listas de descubrimiento asistidas por el algoritmo, garantizando una selección musical con mayor afinidad y retención de usuarios.
+
+---
+
+### 3.2. KPIs Técnicos de Machine Learning
+Evalúan la calidad estadística de las predicciones y la equidad del pipeline analítico:
+
+1. **Error Absoluto Medio (*Mean Absolute Error* - MAE):**
+   * **Definición:** Métrica continua que cuantifica el promedio de las diferencias absolutas entre el puntaje de popularidad real de la canción y el estimado por el modelo.
+   * **Meta Cuantificable:** Obtener un **$\text{MAE} < 5$ puntos de popularidad** (en la escala nativa de 0 a 100) evaluado sobre el conjunto de prueba desacoplado (*test set*), asegurando un margen de error estrecho y confiable para la toma de decisiones.
+
+2. **Tasa de Impacto Dispar (*Disparate Impact Ratio* - DIR / Regla del 80%):**
+   * **Definición:** Métrica de justicia algorítmica (*fairness*) que evalúa la relación entre la tasa de predicción favorable otorgada a géneros minoritarios/independientes frente a la tasa de géneros comerciales dominantes:
+     $$\text{DIR} = \frac{P(\hat{Y} = 1 \mid \text{Género Minoritario})}{P(\hat{Y} = 1 \mid \text{Género Dominante})}$$
+   * **Meta Cuantificable:** Mantener un **$\text{DIR} \ge 0.80$**, garantizando el cumplimiento del umbral regulatorio contra la discriminación automatizada y evitando que el algoritmo margine sistemáticamente la música de nicho en favor de los estilos masivos.
+
+---
+
+### 3.3. Matriz de Alineación Estratégica
+
+| Objetivo Estratégico | KPI de Negocio Asociado | Métrica Técnica / ML | Meta Cuantificable |
+| :--- | :--- | :--- | :--- |
+| **Detección de Talento** | Identificación de éxitos emergentes | Sensibilidad (*Recall*) en temas $\ge 60$ pts | $\ge 70\%$ de acierto |
+| **Precisión de Catálogo** | Estimación fiable del puntaje musical | Error Absoluto Medio (MAE) | $< 5$ puntos de error |
+| **Retención del Usuario** | Reducción de saltos (*Skip Rate*) | Precisión (*Precision*) en alta popularidad | Disminución del 5% en saltos |
+| **Equidad Algorítmica** | Representatividad de música diversa | Tasa de Impacto Dispar (DIR) | $\ge 0.80$ (Regla del 80%) |
+
+---
+
+# 4. Descripción de las Fuentes de Datos y Entorno Tecnológico
+
+### 4.1. Ficha Técnica y Estructura del Dataset
+La base de información empleada corresponde al conjunto de datos **Spotify Tracks Dataset**, derivado de la API oficial de Spotify (*Spotify Web API*). El dataset crudo inicial cuenta con **114.000 registros** y **21 atributos estructurados**, que combinan identificadores, metadatos artísticos y variables de procesamiento de señales de audio:
+
+* **Identificadores y Metadatos:** `track_id` (identificador único alfanumérico de Spotify), `artists` (artista o artistas intérpretes, separados por punto y coma), `album_name` (álbum de publicación), `track_name` (título de la canción) y `track_genre` (clasificación estilística con 114 géneros musicales únicos).
+* **Variable Objetivo (*Target*):** `popularity` (variable numérica entera que oscila entre 0 y 100, calculada dinámicamente por la plataforma según el volumen y recencia de reproducciones).
+* **Variables de Audio Intrínsecas:** Atributos acústicos normalizados entre $0.0$ y $1.0$ (`danceability`, `energy`, `speechiness`, `acousticness`, `instrumentalness`, `liveness`, `valence`), variables físicas (`loudness` en decibeles, `tempo` en BPM, `duration_ms` en milisegundos), y descriptores tonales (`key`, `mode`, `time_signature`).
+* **Contenido Explícito:** `explicit` (indicador booleano que señala si la pista contiene letras explícitas).
+
+---
+
+### 4.2. Procedencia, Ingesta Remota e Integridad Criptográfica
+Para asegurar la reproducibilidad de la solución sin depender de descargas manuales locales, el archivo de datos (`Spotify_Tracks_Dataset.csv`) se encuentra alojado en un repositorio público de **GitHub**. 
+
+La ingesta se efectúa en memoria mediante una petición HTTP vía `requests` y decodificación binaria con `io.BytesIO`, parseada directamente mediante la librería `pandas` en Python. Con el fin de certificar la inalterabilidad de la fuente desde su origen, el pipeline ejecuta de forma obligatoria una auditoría criptográfica mediante la función hash **SHA-256**:
+
+$$\text{Hash Verificado:} \quad \texttt{b202fa49909b2d5cef71a04b1d21243cfeb36414535f2ca9272aa646721177bd}$$
+
+Si el valor calculado sobre los bytes entrantes difiere del valor de control original, la ejecución se interrumpe de inmediato mediante excepciones controladas (`ValueError` / `RuntimeError`), garantizando que ningún dato corrompido o adulterado ingrese a la fase analítica.
+
+---
+
+### 4.3. Auditoría de Privacidad y Cumplimiento Normativo (PII Audit)
+Se realizó una inspección sobre el contenido de la fuente para determinar la presencia de información de identificación personal (*Personally Identifiable Information* - PII). Se verificó que el conjunto de datos:
+* **No contiene identificadores de usuarios:** No almacena RUT, direcciones de correo, identificadores de clientes, hábitos individuales de consumo ni registros de geolocalización de oyentes.
+* **Tratamiento de figuras públicas:** Los nombres registrados corresponden a artistas y figuras de notoriedad pública dentro del ámbito comercial musical.
+* **Cumplimiento legal:** El manejo de la información respeta los estándares vigentes de la regulación nacional de protección de datos personales de Chile (**Ley N° 21.719**) y los principios de minimización del dato del **RGPD/GDPR europeo**.
+
+---
+
+### 4.4. Justificación de Herramientas Colaborativas y Ecosistema Técnico
+En conformidad con las directrices de la metodología CRISP-DM, se adoptó el siguiente entorno tecnológico colaborativo:
+
+1. **GitHub (Control de Versiones y Distribución):** Utilizado como repositorio central para el versionamiento semántico del código fuente (`.ipynb`), el seguimiento de cambios (*commits*) entre integrantes del equipo y la distribución desacoplada de los datos crudos.
+2. **Google Colab (Entorno de Cómputo Colaborativo en la Nube):** Seleccionado como entorno de desarrollo unificado para permitir la edición concurrente y la reproducibilidad exacta de dependencias analíticas en máquinas virtuales homogéneas, eliminando discrepancias operativas entre sistemas operativos locales.
+3. **Ecosistema Científico de Python:**
+   * `pandas` y `numpy`: Para la ingesta, manipulación estructurada y cálculo vectorial eficiente.
+   * `matplotlib` y `seaborn`: Para la construcción de visualizaciones estadísticas (histogramas, boxplots y barras comparativas.
+   * `scipy`: Para pruebas estadísticas inferenciales (Chi-cuadrado y cálculo de V de Cramér).
+   * `scikit-learn` y `category_encoders`: Para el encapsulamiento del flujo de transformación mediante `ColumnTransformer` (con `OneHotEncoder`, `TargetEncoder` y escaladores numéricos), asegurando una separación estricta entre entrenamiento y prueba (*Train/Test split*) sin fuga de información (*data leakage*).
 
 ## 5. Metodología CRISP-DM
 La metodologia cuenta con seis fases principales que nos permitieron desarrollar el proyecto:
