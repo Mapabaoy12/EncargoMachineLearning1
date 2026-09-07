@@ -6,6 +6,7 @@ para determinar los factores de éxito de la industria.
 
 ## 2. Objetivos del proyecto
 **Objetivo General:** Desarrollar un modelo de aprendizaje que permita predecir, con una buena precisión, la popularidad de una canción. Además, se pretende encontrar patrones que permitan entender mejor las preferencias generales del público.
+
 **Objetivos específicos:**  
 -   Identificar variables con alta correlación con la variable objetivo "popularity".
 -   Identificar sesgos dentro del dataset.
