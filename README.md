@@ -16,8 +16,9 @@ para determinar los factores de éxito de la industria.
 
 ## 3. Definiciones de KPIs
 Para medir el exito del proyecto se definen los siguientes KPIs
-*  **que metrica priorizamos chiques
-*  **Reduccion de dimensionalidad:** Disminuir las variables de alta cardinalidad
+*  Obtener un MAE < 5 puntos de popularidad (escala 0 a 100) en el conjunto de datos de prueba.
+*  
+*  Lograr que el modelo identifique correctamente al menos el 70% de las canciones con potencial de éxito (popularidad > 60) producidas por artistas emergentes o independientes.
   
 
 ## 4. Fuente de datos
