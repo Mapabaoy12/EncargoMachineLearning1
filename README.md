@@ -97,37 +97,101 @@ En conformidad con las directrices de la metodología CRISP-DM, se adoptó el si
    * `scipy`: Para pruebas estadísticas inferenciales (Chi-cuadrado y cálculo de V de Cramér).
    * `scikit-learn` y `category_encoders`: Para el encapsulamiento del flujo de transformación mediante `ColumnTransformer` (con `OneHotEncoder`, `TargetEncoder` y escaladores numéricos), asegurando una separación estricta entre entrenamiento y prueba (*Train/Test split*) sin fuga de información (*data leakage*).
 
-## 5. Metodología CRISP-DM
-La metodologia cuenta con seis fases principales que nos permitieron desarrollar el proyecto:
-* **Comprensión del negocio**
-  En la industria musical digital se vuelve necesario comprender los factores que impulsan el éxito comercial y la recepción de la audiencia, no sólo para los artistas, sino también para las propias plataformas. Es por lo anterior que se define como objetivo el desarrollo de un modelo analítico y predictivo que sea capaz de procesar la información referente a las canciones de Spotify para estimar su grado de éxito comercial, definiendo un flujo de trabajo que se centre en la estructura que facilite la reproducibilidad del entorno.
-  
-* **Comprensión de los datos**
-  Todo el análisis es basado en el dataset presente en este repositorio de nombre 'Spotify_Tracks_Dataset.csv', el cuál contiene un volumen inicial de 114.000 registros, cada uno correspondiente a pistas musicales presentes en la plataforma. Cada registro cuenta con variables cuantitativas de audio así como datos descriptivos(artistas, álbumes, géneros).
+# 5. Preparación y Análisis Exploratorio de los Datos (EDA)
 
-  Durante la fase de exploración se identificaron dos dilemas significativos que requirieron análisis más detallado:
-  - *Duplicidad por género:* Cuando una canción está asociada a más de un género, existían múltiples filas para esa canción en particular, lo que inflaba la cantidad de filas totales de 89740 canciones únicas a 114.000 filas de registros.
-  - *Comportamiento de la variable objetivo:* Se observó que la variable objetivo para este proyecto('popularity') cuenta con una alta concentración en torno al valor 0, equivalente a aproximadamente un 14% de los registros.
-* **Preparación de los datos**
-  Limpieza de nulos, eliminación de duplicados, Feature Engineering 
-* **Modelado**
-*   Aun por hacer
-* **Evaluacion**
-*   Aun por hacer
-* **Despliegue**
-*   Aun por hacer
+El análisis exploratorio de datos y el flujo de preparación se ejecutaron de manera secuencial e iterativa, garantizando que cada transformación estuviera técnicamente justificada por la evidencia estadística encontrada y blindada contra la fuga de datos (*data leakage*).
 
-## 6. Analisis exploratorio
-Para proteger la privacidad de los datos se ocupa la función SHA-256 para encriptarlos y mantenerlos anónimos,
-esto ayuda a mantener la integridad de los datos de llegada para verificar que no estén corrompidos,
-asegurando el cumplimiento da ley de protección de datos 21.719.\
-El dataset presenta cierta de cantidad de datos con poca relevancia estadística o duplicados, 
-cómo se comprueba al buscar filas que tengan la columna "track_id" y "track_genre" con los mismos datos, se opta eliminarlos para mitigar sesgo innecesario, no obstante,
-se mantienen filas que tienen los mismos datos a excepción del género, debido a la importancia del último en un modelo que busca predecir la popularidad,
-a consciencia del sesgo que llegara a producir dentro del algoritmo.\
-Se opta de la eliminacion de variables como 'track_id', 'track_name', 'album_name', 'energy' y 'Unnamed: 0', por la alta correlacion con la variable objetivo, 
-ya que si fuera entrenado con esto se produciria sobreajuste(era ese verda, si, a ya).\
-La variable 'artist' se busca mantener a pesar de su alta correlacion con el objetivo debido a la importancia del artista al momento de predecir popularidad,
-por lo tanto se transforma los datos manteniendo a los artistas que cuentan con mas de 15 canciones, asegurando que el algoritmo aprenda los patrones de popularidad,
+---
+
+### 5.1. Auditoría de Calidad, Limpieza y Depuración Estructural
+Antes de realizar inferencias estadísticas, se auditó la sanidad estructural del conjunto de datos (114.000 filas y 21 columnas iniciales):
+
+1. **Gestión de Registros Nulos:**
+   * **Hallazgo:** Se detectó exactamente **1 registro** con valores faltantes (`NaN`) en los metadatos textuales `artists`, `track_name` y `album_name` (asociado al identificador `track_id: 1kR4gIb7nGxHPI3D2ifs59`).
+   * **Acción y Justificación:** Se aplicó eliminación por lista (*listwise deletion*). Al representar el 0.00087% del volumen total, su exclusión no introduce sesgo de selección muestral ni altera las distribuciones acústicas. Rellenarlo con categorías artificiales como *"Desconocido"* habría distorsionado la posterior codificación y agrupamiento por artista.
+2. **Depuración de Índices Redundantes:**
+   * Se descartó la columna `Unnamed: 0`, la cual correspondía a un índice residual heredado del almacenamiento serializado del CSV sin relevancia analítica ni predictiva.
+3. **Conversión de Unidades Físicas:**
+   * La variable `duration_ms` fue convertida a escala de segundos (`duration_s = duration_ms / 1000`) para mejorar la interpretabilidad operativa y la visualización de distribuciones temporales.
+4. **El Dilema de los Duplicados por Multiplicidad de Género:**
+   * **Hallazgo:** La auditoría arrojó 114.000 filas, pero solo **89.740 canciones únicas** por `track_id`. Se descubrió que Spotify registra una misma canción en múltiples filas para asignarle distintos géneros (`track_genre`), existiendo ~25.000 registros repetidos estructuralmente.
+   * **Riesgo Técnico:** Mantener filas repetidas con idénticos atributos acústicos provocaría que una misma pista quede repartida entre los conjuntos de entrenamiento y prueba (*Train/Test split*), ocasionando **fuga de datos (*data leakage*)** y memorización espuria.
+   * **Acción:** Se colapsó el dataset a registros únicos mediante `groupby('track_id').first()`, garantizando que cada unidad observacional sea tratada una sola vez en el pipeline analítico.
+
+---
+
+### 5.2. Análisis Univariado y Tratamiento de Valores Atípicos (*Outliers*)
+
+1. **Comportamiento Distribucional del Target (`popularity`):**
+   * **Concentración en Cero:** Aproximadamente el **14% de las canciones presentan una popularidad exactamente igual a 0**. Este fenómeno refleja la realidad del negocio: una gran masa de canciones de catálogo profundo o lanzamientos independientes que no logran tracción algorítmica ni reproducciones mínimas.
+   * **Asimetría:** La distribución general está sesgada a la izquierda; la gran mayoría de las canciones se concentra en el rango de $[0, 50]$ puntos, con una cola reducida de éxitos comerciales que superan los 60-75 puntos.
+2. **Inspección de Atributos Acústicos Continuos:**
+   * Se inspeccionaron variables acotadas al rango $[0.0, 1.0]$ (`danceability`, `energy`, `speechiness`, `acousticness`, `instrumentalness`, `liveness`, `valence`) y variables continuas abiertas (`loudness`, `tempo`, `duration_s`).
+   * **Valores Atípicos (*Outliers*):** Los diagramas de caja (*boxplots*) revelaron colas extendidas en `duration_s` (canciones muy largas o audiolibros/sonidos ambientales) y `loudness` (pistas acústicas o silencios extremos).
+   * **Decisión Técnica:** **Se decidió conservar los valores atípicos** sin truncamiento ni eliminación indiscriminada. Estos registros representan expresiones sonoras legítimas de la diversidad musical de Spotify (música clásica, jazz experimental, pistas para dormir). Su tratamiento se delega a técnicas de transformación y escalamiento robusto en la fase de preprocesamiento para evitar distorsiones inducidas.
+
+---
+
+### 5.3. Análisis Bivariado, Multivariado y Dependencias Estadísticas
+
+1. **Evaluación de Correlación Lineal (Spearman):**
+   * Se calculó la matriz de correlación de Spearman entre los atributos de audio numéricos y `popularity`.
+   * **Hallazgo Crítico:** La asociación lineal directa entre los descriptores acústicos individuales y la popularidad es notablemente débil: **ninguna variable numérica original supera $\vert{}r\vert{} = 0.12$** frente al target.
+   * **Conclusión Estadística:** Los atributos acústicos por sí solos explican menos del 1.5% de la varianza del éxito musical. El éxito comercial en streaming no depende exclusivamente de cómo suena una pista, sino de factores contextuales como el género musical, el alcance del artista y las colaboraciones estratégicas.
+2. **Asociación Categórica Multidimensional (V de Cramér / Razón $\eta$):**
+   * Al categorizar la popularidad en quintiles (`popularity_cat`), la métrica **V de Cramér** evidenció una asociación sustancial con `track_genre` y con los artistas.
+   * **Medianas por Género:** Los géneros comerciales como *pop*, *dance* y *latino* presentan medianas sistemáticas sobre los 60 puntos y una alta tasa de éxitos (*hit rate* con popularidad $> 75$), mientras que categorías como *black-metal*, *classical* o *study* se concentran cerca de la base del target.
+3. **Contraste de Perfiles (Canciones Populares vs. No Populares):**
+   * Al comparar las medias acústicas entre canciones populares ($> 75$) e impopulares, se observó que la mayoría de los descriptores son similares, excepto por dos métricas distintivas: **la acústica (`acousticness`) y la instrumentalidad (`instrumentalness`) descienden drásticamente en las canciones altamente exitosas**, confirmando que el público masivo prefiere producciones con alta presencia vocal y sintetizada.
+
+---
+
+### 5.4. Auditoría de Ética, Privacidad y Sesgos Algorítmicos
+
+1. **Privacidad y Cumplimiento Normativo (Ley 21.719 y GDPR):**
+   * Se comprobó la ausencia total de datos de identificación personal directa de usuarios (PII). La verificación criptográfica con **SHA-256** certifica la inalterabilidad de la fuente desde su repositorio en GitHub.
+2. **Sesgo de Selección e Histórico:**
+   * El dataset presenta un sesgo histórico de la industria: los algoritmos pasados y la industria radial han privilegiado la visibilidad de géneros masivos (*pop*, *reggaeton*), relegando la música independiente.
+3. **Auditoría de Impacto Dispar (Regla del 80%):**
+   * Si se evaluara un modelo predictivo optimizado únicamente por precisión matemática sin restricciones, este tendería a predecir popularidad baja para cualquier artista de géneros de nicho.
+   * Se incorpora como restricción de gobernanza evaluar el **Ratio de Impacto Dispar (DIR)** entre géneros minoritarios y comerciales ($\text{DIR} \ge 0.80$), garantizando que el pipeline no discrimine sistemáticamente a la música emergente.
+
+---
+
+### 5.5. Ingeniería de Características (*Feature Engineering*) Vectorizada
+
+Para superar la baja señal predictiva de las variables acústicas crudas y manejar la alta dimensionalidad, se implementaron transformaciones vectorizadas con NumPy y Pandas:
+
+* **Interacción Acústica Aditiva (`valence_instrumentalness_sum`):** Se combinaron `valence` (positividad emocional) e `instrumentalness` (ausencia de voces). Mientras individualmente presentaban correlaciones marginales (0.04 y 0.09), su suma aritmética elevó la fuerza asociativa lineal a un **12% ($r \approx 0.12$)** con la popularidad.
+* **Segregación del Artista Principal (`artista_principal`):** En pistas con múltiples cantantes (separados por punto y coma), se extrajo vectorialmente el primer intérprete (`artists.str.split(';').str[0]`), aislando al artista de mayor impacto comercial y reduciendo la dispersión textual.
+* **Detección Binaria de Colaboración (`es_colaboracion`):** Se creó una bandera booleana (`1/0`) mediante detección de delimitadores en la cadena de artistas (`contains(';')`), capturando el efecto positivo que las colaboraciones (*feats*) generan en la visibilidad de Spotify.
+* **Control de Cardinalidad de Géneros:** De los 114 géneros iniciales, se calcularon frecuencias relativas sobre las canciones desduplicadas; los géneros que representaban un 0.75% o menos del catálogo fueron agrupados bajo la etiqueta general `'otros'`, reduciendo la dimensionalidad a categorías representativas y mitigando el sobreajuste.
+* **Descarte Justificado de Variables:** Se eliminaron identificadores y metadatos no generalizables (`track_id`, `track_name`, `album_name`) por su cardinalidad extrema que induciría memorización espuria (*overfitting*), así como variables acústicas redundantes cuya señal quedó capturada en las nuevas características.
+
+---
+
+### 5.6. Pipeline de Preprocesamiento Desacoplado
+Para garantizar la reproducibilidad y prevenir la fuga de información entre particiones:
+
+1. **Partición Estratificada (*Train/Test Split*):** Se separó el 80% de los datos para entrenamiento y el 20% para evaluación (`test_size=0.2`, `random_state=42`), estratificando por la variable de salida para mantener intacta la proporción de éxitos y temas impopulares en ambas muestras.
+2. **Ensamblaje con `ColumnTransformer`:**
+   * **Variables numéricas** (`speechiness`, `valence_instrumentalness_sum`, `es_colaboracion`): Flujo directo (`passthrough`).
+   * **Variable categórica nominal** (`track_genre`): Codificación `OneHotEncoder(handle_unknown='ignore', sparse_output=False)`.
+   * **Variable de alta cardinalidad** (`artista_principal`): Codificación supervisada mediante `TargetEncoder()`, aprendiendo el impacto del artista ajustado exclusivamente sobre el conjunto de entrenamiento (`X_train`).
+
+```python
+# Arquitectura del Pipeline de Transformación
+preprocesador = ColumnTransformer(
+    transformers=[
+        ("num", "passthrough", cols_num),
+        ("ohe", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cols_nom_ohe),
+        ("te", TargetEncoder(), cols_nom_te)
+    ],
+    remainder="drop",
+    verbose_feature_names_out=False
+).set_output(transform="pandas")
+
+X_train_procesado = preprocesador.fit_transform(X_train, y_train)
+X_test_procesado = preprocesador.transform(X_test)
 los demas que cuenten con una menor cantidad seran etiquetados como "Otros", esto a consciencia de bandas indie o artistas de un solo exito donde el algoritmo no aprendera
 y su prescencia solo aportara ruido.
