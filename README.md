@@ -193,5 +193,3 @@ preprocesador = ColumnTransformer(
 
 X_train_procesado = preprocesador.fit_transform(X_train, y_train)
 X_test_procesado = preprocesador.transform(X_test)
-los demas que cuenten con una menor cantidad seran etiquetados como "Otros", esto a consciencia de bandas indie o artistas de un solo exito donde el algoritmo no aprendera
-y su prescencia solo aportara ruido.
